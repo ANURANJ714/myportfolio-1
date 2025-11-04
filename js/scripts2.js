@@ -96,16 +96,48 @@ document.addEventListener('DOMContentLoaded', function() {
         // IF EVERYTHING IS VALID, SUBMIT THE FORM
         // ============================================
         if (isFormValid) {
-            // Show success message
-            document.getElementById('submitSuccessMessage').classList.remove('d-none');
-            
             // Change button text
             let button = document.getElementById('submitButton');
-            button.textContent = 'Sending...';
+            button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Sending...';
             button.disabled = true;
             
-            // Submit the form to Google Sheets
-            contactForm.submit();
+            // Submit the form using AJAX (no page reload)
+            let formData = new FormData(contactForm);
+            
+            fetch(contactForm.action, {
+                method: 'POST',
+                body: formData,
+                mode: 'no-cors'
+            })
+            .then(function() {
+                // Show success message
+                document.getElementById('submitSuccessMessage').classList.remove('d-none');
+                
+                // Reset form
+                contactForm.reset();
+                
+                // Reset button
+                button.innerHTML = 'Send Message';
+                button.disabled = false;
+                
+                // Hide success message after 5 seconds
+                setTimeout(function() {
+                    document.getElementById('submitSuccessMessage').classList.add('d-none');
+                }, 5000);
+            })
+            .catch(function(error) {
+                // Show error message
+                document.getElementById('submitErrorMessage').classList.remove('d-none');
+                
+                // Reset button
+                button.innerHTML = 'Send Message';
+                button.disabled = false;
+                
+                // Hide error message after 5 seconds
+                setTimeout(function() {
+                    document.getElementById('submitErrorMessage').classList.add('d-none');
+                }, 5000);
+            });
         } else {
             // Scroll to first error
             let firstError = document.querySelector('.is-invalid');
